@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}All Students{% endblock %}
+{% block content %}
+<div class="page">
+    <div class="page-head">
+        <div>
+            <h1>Student Records</h1>
+            <p>
+                {% if students %}
+                    You have <strong>{{ students|length }}</strong> student{{ 's' if students|length != 1 }} registered.
+                {% else %}
+                    Ready to add your first student? Let's get started!
+                {% endif %}
+            </p>
+        </div>
+        <a href="{{ url_for('add_student') }}" class="btn btn-orange">Add New Student</a>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="card" style="margin-bottom: 1rem;">
+        <input type="text" id="searchInput" placeholder="Search here" 
+               style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; font-family: inherit; transition: all 0.3s;" onfocus="this.style.borderColor='#667eea'; this.style.boxShadow='0 0 0 3px rgba(102,126,234,0.1)';" onblur="this.style.borderColor=''; this.style.boxShadow='';;">
+    </div>
+
+    <div class="card">
+        {% if students %}
+        <div class="table-wrap">
+            <table id="studentTable">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Roll Number</th>
+                        <th>Name</th>
+                        <th>Python</th>
+                        <th>C++</th>
+                        <th>Java</th>
+                        <th>Average</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in students %}
+                    <tr>
+                        <td style="color: var(--muted); font-size: 0.8rem;">{{ loop.index }}</td>
+                        <td><strong>{{ s.roll_no }}</strong></td>
+                        <td>{{ s.name }}</td>
+                        <td>{{ s.python_marks }}</td>
+                        <td>{{ s.cpp_marks }}</td>
+                        <td>{{ s.java_marks }}</td>
+                        <td><strong>{{ "%.2f"|format(s.average_marks) }}</strong></td>
+                        <td><span class="badge g-{{ s.grade.replace('+','plus') }}">{{ s.grade }}</span></td>
+                        <td>
+                            {% if s.average_marks >= 60 %}
+                            <span style="font-size: 0.8rem; color: #15803d; font-weight: 600;">Pass</span>
+                            {% else %}
+                            <span style="font-size: 0.8rem; color: #dc2626; font-weight: 600;">Fail</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{{ url_for('edit_student', student_id=s.id) }}" class="btn-edit-sm">Edit</a>
+                            <button onclick="deleteStudent('{{ s.id }}', '{{ s.name }}')" class="btn-danger-sm">Delete</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="ei"></div>
+            <p>No students in the system yet.</p>
+            <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.8rem;">Start by <a href="{{ url_for('add_student') }}" style="color: var(--accent); font-weight: 600;">adding your first student</a> to the system.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// Search Functionality
+const searchInput = document.getElementById('searchInput');
+const studentTable = document.getElementById('studentTable');
+
+if (studentTable) {
+    const tableRows = studentTable.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    
+    searchInput.addEventListener('keyup', function() {
+    const searchTerm = this.value.toLowerCase();
+    let visibleCount = 0;
+    
+    for (let row of tableRows) {
+        const rollNo = row.cells[1].textContent.toLowerCase();
+        const name = row.cells[2].textContent.toLowerCase();
+        const python = row.cells[3].textContent.toLowerCase();
+        const cpp = row.cells[4].textContent.toLowerCase();
+        const java = row.cells[5].textContent.toLowerCase();
+        
+        if (rollNo.includes(searchTerm) || name.includes(searchTerm) || python.includes(searchTerm) || cpp.includes(searchTerm) || java.includes(searchTerm)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    }
+    
+    // Show/hide empty message if needed
+    let emptyMsg = document.getElementById('noResults');
+    if (visibleCount === 0) {
+        if (!emptyMsg) {
+            emptyMsg = document.createElement('div');
+            emptyMsg.id = 'noResults';
+            emptyMsg.style.cssText = 'text-align: center; padding: 2rem; color: var(--muted);';
+            emptyMsg.innerHTML = 'No students found for "' + searchTerm + '". Try a different search!';
+            studentTable.parentElement.after(emptyMsg);
+        }
+        emptyMsg.style.display = '';
+    } else if (emptyMsg) {
+        emptyMsg.style.display = 'none';
+    }
+    });
+}
+
+function deleteStudent(id, name) {
+    if (confirm(`Are you sure you want to remove ${name} from the system? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/delete-student/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Add Student{% endblock %}
+{% block content %}
+<div class="page">
+    <div class="page-head">
+        <div>
+            <h1>Add New Student</h1>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Back</a>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        <div class="card-head"><h2>Student Information</h2></div>
+        <div class="card-body" style="position: relative;">
+
+            <form method="POST" action="{{ url_for('add_student') }}" novalidate>
+                <div class="form-group">
+                    <label for="roll_no">Roll Number <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="roll_no" name="roll_no"
+                           maxlength="30" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Student Full Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="name" name="name"
+                           placeholder="Full name"
+                           maxlength="80" required>
+                </div>
+
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="python_marks">Python Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="python_marks" name="python_marks"
+                               placeholder="0-100"
+                               min="0" max="100"
+                               oninput="updateAverage()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cpp_marks">C++ Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="cpp_marks" name="cpp_marks"
+                               placeholder="0-100"
+                               min="0" max="100"
+                               oninput="updateAverage()" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="java_marks">Java Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                    <input type="number" id="java_marks" name="java_marks"
+                           placeholder="0-100"
+                           min="0" max="100"
+                           oninput="updateAverage()" required>
+                    <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.7rem;">
+                        <span class="form-hint">Average: <strong id="avg-display">--</strong></span>
+                        <span class="form-hint">Grade: <span id="grade-preview" class="badge" style="display:none; padding: 0.3rem 0.8rem;"></span></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.8rem; padding-top: 1.2rem; border-top: 1px solid var(--border);">
+                    <button type="submit" class="btn btn-orange">Add Student</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const gradeMap = {'A':'g-A','B':'g-B','C':'g-C','D':'g-D','F':'g-F'};
+
+function updateAverage() {
+    const py = document.getElementById('python_marks').value;
+    const cpp = document.getElementById('cpp_marks').value;
+    const java = document.getElementById('java_marks').value;
+    
+    if (py && cpp && java) {
+        const avg = ((parseInt(py) + parseInt(cpp) + parseInt(java)) / 3).toFixed(2);
+        document.getElementById('avg-display').textContent = avg;
+        previewGrade(avg);
+    } else {
+        document.getElementById('avg-display').textContent = '--';
+        document.getElementById('grade-preview').style.display = 'none';
+    }
+}
+
+function previewGrade(val) {
+    const el = document.getElementById('grade-preview');
+    if (!val || isNaN(val)) { el.style.display = 'none'; return; }
+    
+    val = parseFloat(val);
+    let grade = 'F';
+    if (val >= 90) grade = 'A';
+    else if (val >= 80) grade = 'B';
+    else if (val >= 70) grade = 'C';
+    else if (val >= 60) grade = 'D';
+    
+    el.textContent = grade;
+    el.className = 'badge ' + (gradeMap[grade] || '');
+    el.style.display = 'inline-block';
+}
+</script>
+{% endblock %}

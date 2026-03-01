@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="page">
+
+<!-- Admin Dashboard -->
+<div class="page-head">
+    <div>
+        <h1>Welcome Back, Admin</h1>
+        <!-- <p>Here's an overview of all your students and their academic performance.</p> -->
+    </div>
+    <a href="{{ url_for('add_student') }}" class="btn btn-orange">Add New Student</a>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-box s-total">
+        <div class="stat-label">Total Students</div>
+        <div class="stat-val">{{ students|length }}</div>
+    </div>
+</div>
+
+<!-- All Students Table -->
+<div class="card">
+    <div class="card-head">
+        <h2>All Students</h2>
+    </div>
+    
+    {% if students %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll Number</th>
+                    <th>Name</th>
+                    <th>Python</th>
+                    <th>C++</th>
+                    <th>Java</th>
+                    <th>Average</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td><strong>{{ student.roll_no }}</strong></td>
+                    <td>{{ student.name }}</td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>{{ student.python_marks }}</span>
+                            <span class="mini-bar"><span class="mini-fill" style="width: {{ student.python_marks }}%; background: {% if student.python_marks >= 60 %}#22c55e{% else %}#ef4444{% endif %};"></span></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>{{ student.cpp_marks }}</span>
+                            <span class="mini-bar"><span class="mini-fill" style="width:{{ student.cpp_marks }}%; background: {% if student.cpp_marks >= 60 %}#22c55e{% else %}#ef4444{% endif %};"></span></span>
+                        </div>
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                            <span>{{ student.java_marks }}</span>
+                            <span class="mini-bar"><span class="mini-fill" style="width: {{ student.java_marks }}%; background: {% if student.java_marks >= 60 %}#22c55e{% else %}#ef4444{% endif %};"></span></span>
+                        </div>
+                    </td>
+                    <td><strong>{{ "%.2f"|format(student.average_marks) }}</strong></td>
+                    <td>
+                        <span class="badge g-{{ student.grade.replace('+', 'plus') }}">{{ student.grade }}</span>
+                    </td>
+                    <td>
+                        <a href="{{ url_for('edit_student', student_id=student.id) }}" class="btn-edit-sm">Edit</a>
+                        <button onclick="deleteStudent('{{ student.id }}', '{{ student.name }}')" class="btn-danger-sm">Delete</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="ei"></div>
+        <p>No students registered yet.</p>
+        <p style="color: var(--muted); font-size: 0.9rem; margin-top: 0.8rem;">Ready to get started? <a href="{{ url_for('add_student') }}" style="color: var(--accent); font-weight: 600;">Add your first student</a> and begin tracking their results!</p>
+    </div>
+    {% endif %}
+</div>
+
+</div>
+
+<!-- Delete Confirmation Modal -->
+<script>
+function deleteStudent(id, name) {
+    if (confirm(`Are you sure you want to remove ${name} from the system? This action cannot be undone.`)) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/delete-student/${id}`;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% block title %}Edit Student{% endblock %}
+{% block content %}
+<div class="page">
+    <div class="page-head">
+        <div>
+            <h1>Edit Student Record</h1>
+            <p>Updating record for <strong>{{ student.name }}</strong> (Roll: {{ student.roll_no }})</p>
+        </div>
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Back</a>
+    </div>
+
+    <div class="card" style="max-width: 600px;">
+        <div class="card-head"><h2>Student Information</h2></div>
+        <div class="card-body">
+
+            <form method="POST" action="{{ url_for('edit_student', student_id=student.id) }}" novalidate>
+                <div class="form-group">
+                    <label for="roll_no">Roll Number <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="roll_no" name="roll_no"
+                           value="{{ student.roll_no }}"
+                           maxlength="30" readonly
+                           style="background: #f5f5f5; cursor: not-allowed;">
+                </div>
+
+                <div class="form-group">
+                    <label for="name">Student Full Name <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="name" name="name"
+                           value="{{ student.name }}"
+                           maxlength="80" required>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="python_marks">Python Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="python_marks" name="python_marks"
+                               value="{{ student.python_marks }}"
+                               min="0" max="100"
+                               oninput="updateAverage()" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="cpp_marks">C++ Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                        <input type="number" id="cpp_marks" name="cpp_marks"
+                               value="{{ student.cpp_marks }}"
+                               min="0" max="100"
+                               oninput="updateAverage()" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="java_marks">Java Marks (0-100) <span style="color:#ef4444;">*</span></label>
+                    <input type="number" id="java_marks" name="java_marks"
+                           value="{{ student.java_marks }}"
+                           min="0" max="100"
+                           oninput="updateAverage()" required>
+                    <div style="margin-top: 0.5rem; display: flex; align-items: center; gap: 0.7rem;">
+                        <span class="form-hint">Average: <strong id="avg-display">{{ "%.2f"|format(student.average_marks) }}</strong></span>
+                        <span class="form-hint">Grade: <span id="grade-preview" class="badge" style="padding: 0.3rem 0.8rem;"></span></span>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.8rem; margin-top: 1.8rem; padding-top: 1.2rem; border-top: 1px solid var(--border);">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+const gradeMap = {'A':'g-A','B':'g-B','C':'g-C','D':'g-D','F':'g-F'};
+
+function updateAverage() {
+    const py = document.getElementById('python_marks').value;
+    const cpp = document.getElementById('cpp_marks').value;
+    const java = document.getElementById('java_marks').value;
+    
+    if (py && cpp && java) {
+        const avg = ((parseInt(py) + parseInt(cpp) + parseInt(java)) / 3).toFixed(2);
+        document.getElementById('avg-display').textContent = avg;
+        previewGrade(avg);
+    }
+}
+
+function previewGrade(val) {
+    const el = document.getElementById('grade-preview');
+    if (!val || isNaN(val)) { el.textContent = ''; return; }
+    
+    val = parseFloat(val);
+    let grade = 'F';
+    if (val >= 90) grade = 'A';
+    else if (val >= 80) grade = 'B';
+    else if (val >= 70) grade = 'C';
+    else if (val >= 60) grade = 'D';
+    
+    el.textContent = grade;
+    el.className = 'badge ' + (gradeMap[grade] || '');
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+    const previewEl = document.getElementById('grade-preview');
+    if (previewEl) {
+        const avg = '{{ student.average_marks }}';
+        previewGrade(avg);
+    }
+});
+</script>
+{% endblock %}

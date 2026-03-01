@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Result Management{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --navy: #1a2548; --navy2: #0f1729; --blue: #0ea5e9; --accent: #8b5cf6; --accent2: #a78bfa;
+            --bg: #f5f7fb; --surface: #ffffff; --border: #e1e8f0; --muted: #64748b; --text: #1a2548;
+            --success: #10b981; --success-bg: #d1fae5; --error: #ef4444; --error-bg: #fee2e2; --info: #0ea5e9; --info-bg: #cffafe;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Source Sans 3', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; }
+
+        .topbar { background: linear-gradient(135deg, #1a2548 0%, #232f4f 50%, #1a2548 100%); display: flex; align-items: center; justify-content: space-between; padding: 0 2rem; height: 58px; position: sticky; top: 0; z-index: 200; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+        .brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+        .brand-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(139,92,246,0.3); }
+        .brand-name { font-family: 'Playfair Display', serif; font-size: 1.35rem; color: #ffffff; letter-spacing: 0.01em; font-weight: 700; }
+        .brand-name span { color: var(--accent2); }
+
+        .topbar-right { display: flex; align-items: center; gap: 0.3rem; }
+        .nav-link { color: rgba(255,255,255,0.72); text-decoration: none; font-size: 0.82rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.5rem 0.9rem; border-radius: 6px; transition: all 0.2s; }
+        .nav-link:hover { color: #fff; background: rgba(255,255,255,0.12); }
+        .nav-link.active { color: #fff; background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); }
+        .nav-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.2); margin: 0 0.4rem; }
+
+        .user-pill { display: flex; align-items: center; gap: 0.5rem; background: rgba(255,255,255,0.1); border-radius: 20px; padding: 0.3rem 0.9rem 0.3rem 0.5rem; margin-left: 0.5rem; backdrop-filter: blur(10px); }
+        .user-avatar { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; font-weight: 700; }
+        .avatar-admin { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: white; }
+        .avatar-student { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); color: white; }
+        .user-info { line-height: 1.1; }
+        .user-name { font-size: 0.8rem; font-weight: 700; color: white; }
+        .user-role { font-size: 0.68rem; color: rgba(255,255,255,0.55); text-transform: uppercase; letter-spacing: 0.05em; }
+        .btn-logout { color: rgba(255,255,255,0.65); font-size: 0.75rem; margin-left: 0.7rem; text-decoration: none; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; padding: 0.2rem 0.6rem; transition: all 0.15s; }
+        .btn-logout:hover { background: rgba(255,255,255,0.15); color: white; }
+
+        .flashes { max-width: 1080px; margin: 1rem auto 0; padding: 0 1.5rem; }
+        .flash { display: flex; align-items: flex-start; gap: 0.7rem; padding: 1rem 1.3rem; border-radius: 8px; margin-bottom: 0.5rem; font-size: 0.88rem; font-weight: 600; border-left: 4px solid; animation: fadeSlide 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .flash.success { background: var(--success-bg); color: var(--success); border-color: #22c55e; }
+        .flash.error { background: var(--error-bg); color: var(--error); border-color: #ef4444; }
+        .flash.info { background: var(--info-bg); color: var(--info); border-color: #60a5fa; }
+        @keyframes fadeSlide { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .page { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+        .page-head { margin-bottom: 2rem; padding-bottom: 1.3rem; border-bottom: 2px solid var(--border); display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+        .page-head h1 { font-family: 'Playfair Display', serif; font-size: 2.1rem; color: var(--navy); line-height: 1.1; font-weight: 700; }
+        .page-head p { color: var(--muted); margin-top: 0.4rem; font-size: 0.93rem; }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); transition: all 0.3s ease; }
+        .card:hover { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .card-head { padding: 1.2rem 1.5rem; border-bottom: 2px solid var(--border); background: linear-gradient(135deg, #f0f9ff 0%, #f0fdf4 100%); display: flex; align-items: center; justify-content: space-between; }
+        .card-head h2 { font-family: 'Playfair Display', serif; font-size: 1.15rem; color: var(--navy); font-weight: 700; }
+        .card-body { padding: 1.8rem; }
+
+        .btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.65rem 1.4rem; border-radius: 6px; font-family: 'Source Sans 3', sans-serif; font-size: 0.88rem; font-weight: 700; cursor: pointer; border: none; text-decoration: none; transition: all 0.2s; letter-spacing: 0.02em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(14,165,233,0.4); }
+        .btn-orange { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); color: white; }
+        .btn-orange:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,0.4); }
+        .btn-ghost { background: white; color: var(--navy); border: 1.5px solid var(--border); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .btn-ghost:hover { border-color: var(--navy); background: #f8f9ff; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .btn-danger-sm { background: white; color: var(--error); border: 1.5px solid #fda29b; border-radius: 6px; font-family: 'Source Sans 3', sans-serif; font-size: 0.8rem; font-weight: 700; cursor: pointer; padding: 0.4rem 0.85rem; transition: all 0.2s; box-shadow: 0 1px 4px rgba(239,68,68,0.1); }
+        .btn-danger-sm:hover { background: var(--error); color: white; border-color: var(--error); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(239,68,68,0.3); }
+        .btn-edit-sm { display: inline-flex; align-items: center; background: white; color: var(--blue); border: 1.5px solid #bae6fd; border-radius: 6px; font-size: 0.8rem; font-weight: 700; padding: 0.4rem 0.85rem; text-decoration: none; transition: all 0.2s; box-shadow: 0 1px 4px rgba(14,165,233,0.1); }
+        .btn-edit-sm:hover { background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 100%); color: white; border-color: var(--blue); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14,165,233,0.3); }
+
+        .form-group { margin-bottom: 1.4rem; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.3rem; }
+        label { display: block; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--navy); margin-bottom: 0.5rem; }
+        input[type=text], input[type=password], input[type=number], select { width: 100%; padding: 0.8rem 1rem; border: 1.5px solid var(--border); border-radius: 7px; font-family: 'Source Sans 3', sans-serif; font-size: 0.95rem; background: white; color: var(--text); transition: all 0.2s; outline: none; }
+        input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(139,92,246,0.1); }
+        input.is-error { border-color: #ef4444; }
+        .form-hint { font-size: 0.76rem; color: var(--muted); margin-top: 0.3rem; }
+        .error-list { background: var(--error-bg); border: 1px solid #fda29b; border-left: 4px solid #ef4444; border-radius: 8px; padding: 1rem 1.3rem; margin-bottom: 1.2rem; box-shadow: 0 2px 8px rgba(239,68,68,0.1); }
+        .error-list p { color: var(--error); font-size: 0.88rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .error-list ul { list-style: none; }
+        .error-list li { color: var(--error); font-size: 0.85rem; padding: 0.15rem 0; }
+        .error-list li::before { content: "• "; }
+
+        .table-wrap { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        thead { background: linear-gradient(135deg, #1a2548 0%, #232f4f 100%); }
+        thead th { color: rgba(255,255,255,0.95); padding: 0.9rem 1.2rem; text-align: left; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; white-space: nowrap; }
+        thead th a { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 0.3rem; }
+        thead th a:hover { color: #e0f2fe; }
+        tbody tr { border-bottom: 1px solid var(--border); transition: all 0.2s; }
+        tbody tr:hover { background: linear-gradient(90deg, #f0f9ff 0%, #f5f7fb 100%); transform: scale(1.005); transform-origin: left; }
+        tbody tr:last-child { border-bottom: none; }
+        tbody td { padding: 1rem 1.2rem; vertical-align: middle; font-weight: 500; }
+
+        .badge { display: inline-block; padding: 0.25rem 0.7rem; border-radius: 6px; font-weight: 800; font-size: 0.8rem; letter-spacing: 0.05em; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .g-Aplus { background: linear-gradient(135deg, #ccfbf1 0%, #99f6e4 100%); color: #134e4a; }
+        .g-A { background: linear-gradient(135deg, #cffafe 0%, #a5f3fc 100%); color: #0c4a6e; }
+        .g-Bplus { background: linear-gradient(135deg, #e9d5ff 0%, #ddd6fe 100%); color: #581c87; }
+        .g-B { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #78350f; }
+        .g-C { background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%); color: #7c2d12; }
+        .g-D { background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%); color: #7f1d1d; }
+        .g-F { background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%); color: #1a2548; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.3rem; margin-bottom: 2rem; }
+        .stat-box { background: white; border: 1px solid var(--border); border-radius: 10px; padding: 1.6rem; position: relative; overflow: hidden; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .stat-box:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.15); }
+        .stat-box::before { content: ''; position: absolute; top: 0; right: -50px; width: 150px; height: 150px; border-radius: 50%; opacity: 0.05; }
+        .stat-box.s-total::before { background: var(--blue); }
+        .stat-box.s-pass::before { background: var(--success); }
+        .stat-box.s-fail::before { background: var(--error); }
+        .stat-box.s-avg::before { background: var(--accent); }
+        .stat-box::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 4px; }
+        .stat-box.s-total::after { background: linear-gradient(90deg, var(--blue) 0%, #06b6d4 100%); }
+        .stat-box.s-pass::after { background: linear-gradient(90deg, var(--success) 0%, #34d399 100%); }
+        .stat-box.s-fail::after { background: linear-gradient(90deg, var(--error) 0%, #f87171 100%); }
+        .stat-box.s-avg::after { background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%); }
+        .stat-label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.7rem; }
+        .stat-val { font-family: 'Playfair Display', serif; font-size: 2.5rem; line-height: 1; color: var(--navy); font-weight: 700; }
+
+        .result-wrap { max-width: 520px; margin: 0 auto; }
+        .result-card { background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+        .result-top { background: linear-gradient(135deg, #1a2548 0%, #232f4f 50%, #1a2548 100%); padding: 2.5rem 2rem 1.8rem; text-align: center; position: relative; }
+        .result-top::after { content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 30px; background: white; clip-path: ellipse(55% 100% at 50% 100%); }
+        .result-roll { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 0.5rem; }
+        .result-name { font-family: 'Playfair Display', serif; font-size: 1.9rem; color: white; line-height: 1.1; font-weight: 700; }
+        .result-grade-big { display: inline-block; margin-top: 1rem; padding: 0.45rem 1.4rem; border-radius: 20px; font-weight: 800; font-size: 1.05rem; letter-spacing: 0.05em; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .result-body { padding: 2.5rem 2.2rem 2rem; }
+        .r-row { display: flex; justify-content: space-between; align-items: center; padding: 0.9rem 0; border-bottom: 1px solid var(--border); }
+        .r-row:last-child { border-bottom: none; }
+        .r-key { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+        .r-val { font-weight: 700; font-size: 1.05rem; color: var(--navy); }
+
+        .progress-bar { height: 8px; background: var(--bg); border-radius: 4px; margin: 1.2rem 0 0.3rem; overflow: hidden; }
+        .progress-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent) 0%, #a78bfa 100%); transition: width 0.8s ease; }
+        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--muted); }
+        .empty-state .ei { font-size: 3.2rem; margin-bottom: 1rem; opacity: 0.3; }
+        .mini-bar { width: 55px; height: 5px; background: var(--bg); border-radius: 3px; display: inline-block; vertical-align: middle; overflow: hidden; margin-left: 8px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+        .mini-fill { height: 100%; border-radius: 3px; }
+
+        @media (max-width: 768px) { .stats-grid { grid-template-columns: 1fr 1fr; } .form-row { grid-template-columns: 1fr; } .topbar { padding: 0 1rem; } .nav-link { padding: 0.4rem 0.6rem; font-size: 0.75rem; } }
+        @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+{% if session.user_type %}
+<nav class="topbar">
+    <a href="/" class="brand">
+        <div class="brand-icon">📒</div>
+        <span class="brand-name">Result<span>System</span></span>
+    </a>
+
+    <div class="topbar-right">
+        {% if session.user_type == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="nav-link {{ 'active' if request.endpoint == 'admin_dashboard' }}">Dashboard</a>
+        <a href="{{ url_for('add_student') }}" class="nav-link {{ 'active' if request.endpoint == 'add_student' }}">Add Student</a>
+        <a href="{{ url_for('view_students') }}" class="nav-link {{ 'active' if request.endpoint == 'view_students' }}">View Students</a>
+        {% else %}
+        <a href="{{ url_for('student_result') }}" class="nav-link {{ 'active' if request.endpoint == 'student_result' }}">My Result</a>
+        {% endif %}
+
+        <div class="nav-sep"></div>
+
+        <div class="user-pill">
+            <div class="user-avatar {{ 'avatar-admin' if session.user_type == 'admin' else 'avatar-student' }}">
+                {{ (session.username or session.roll_no)[0].upper() }}
+            </div>
+            <div class="user-info">
+                <div class="user-name">{{ session.username or 'Student' }}</div>
+                <div class="user-role">{{ session.user_type }}</div>
+            </div>
+        </div>
+        <a href="{{ url_for('logout') }}" class="btn-logout">Log out</a>
+    </div>
+</nav>
+{% endif %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flashes">
+    {% for cat, msg in messages %}
+    <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% if not session.user_type %}
+<div class="page">
+    <div style="text-align: center; padding: 4rem 0;">
+        <h1 style="font-size: 2.5rem; margin-bottom: 1rem; color: var(--navy);">Welcome</h1>
+        <p style="color: var(--muted); font-size: 1.1rem; margin-bottom: 2rem;">Student Result Management System</p>
+        <a href="{{ url_for('login') }}" class="btn btn-orange">Go to Login</a>
+    </div>
+</div>
+{% else %}
+{% block content %}{% endblock %}
+{% endif %}
+
+</body>
+</html>

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Student Result{% endblock %}
+{% block content %}
+<div class="page">
+
+    <!-- Student Result Card -->
+    {% if student %}
+    <div style="max-width: 600px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: var(--navy); margin-bottom: 0.5rem;">🎯 Your Academic Result</h1>
+            <p style="color: var(--muted);">Here's your complete performance snapshot</p>
+        </div>
+
+        <div class="result-card">
+            <div class="result-top">
+                <div class="result-roll">Roll Number: <strong>{{ student.roll_no }}</strong></div>
+                <div class="result-name">{{ student.name }}</div>
+                <span class="badge result-grade-big g-{{ student.grade.replace('+','plus') }}" style="font-size: 1.1rem;">
+                    {{ student.grade }}
+                </span>
+            </div>
+
+            <div class="result-body">
+                <div class="r-row">
+                    <span class="r-key">Python</span>
+                    <span class="r-val">{{ student.python_marks }}/100</span>
+                </div>
+                <div class="r-row">
+                    <span class="r-key">C++</span>
+                    <span class="r-val">{{ student.cpp_marks }}/100</span>
+                </div>
+                <div class="r-row">
+                    <span class="r-key">Java</span>
+                    <span class="r-val">{{ student.java_marks }}/100</span>
+                </div>
+                <div class="r-row">
+                    <span class="r-key">Average Marks</span>
+                    <span class="r-val" style="font-family: 'Playfair Display', serif; font-size: 1.6rem;">
+                        {{ "%.2f"|format(student.average_marks) }}<span style="font-size: 0.7rem; font-family: 'Source Sans 3'; color: var(--muted);">/100</span>
+                    </span>
+                </div>
+                <div class="r-row">
+                    <span class="r-key">Grade</span>
+                    <span class="r-val" style="font-size: 1.2rem;">{{ student.grade }}</span>
+                </div>
+                <div class="r-row">
+                    <span class="r-key">Status</span>
+                    <span class="r-val" style="color: {% if student.average_marks >= 60 %}#15803d{% else %}#dc2626{% endif %}; font-size: 1.1rem; font-weight: 700;">
+                        {% if student.average_marks >= 60 %}✓ PASS{% else %}✗ FAIL{% endif %}
+                    </span>
+                </div>
+
+                <div class="progress-bar" style="margin-top: 1.5rem;">
+                    <div class="progress-fill" id="pbar" style="width: 0%; background: {% if student.average_marks >= 60 %}#22c55e{% else %}#ef4444{% endif %};"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem;">
+                    <span>0</span>
+                    <span>{{ "%.2f"|format(student.average_marks) }} / 100</span>
+                    <span>100</span>
+                </div>
+
+                <div style="margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+                    <div style="font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.05em; margin-bottom: 0.8rem;">Grade Scale</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.8rem;">
+                        <div>A: 90-100</div>
+                        <div>B: 80-89</div>
+                        <div>C: 70-79</div>
+                        <div>D: 60-69</div>
+                        <div style="color: #dc2626;">F: Below 60</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+    <script>
+        setTimeout(() => {
+            document.getElementById('pbar').style.width = '{{ student.average_marks }}%';
+        }, 200);
+    </script>
+
+    {% else %}
+    <div style="text-align: center; padding: 2rem;">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">❓</div>
+        <h2 style="color: var(--navy);">Hmm, something's not right</h2>
+        <p style="color: var(--muted); margin-bottom: 1rem;">We couldn't load your result. This might happen if:</p>
+        <ul style="color: var(--muted); text-align: left; display: inline-block;">
+            <li>Your session expired - please log in again</li>
+            <li>There's a temporary issue - try refreshing</li>
+            <li>Contact your admin if the issue persists</li>
+        </ul>
+        <a href="/" class="btn btn-primary" style="margin-top: 1.5rem;">🏠 Go to Home</a>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}
