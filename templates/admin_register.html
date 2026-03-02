@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — Student Result Management</title>
+    <title>Admin Registration — Student Result Management</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -18,14 +18,14 @@
             position: relative;
         }
 
-        .login-wrap {
+        .register-wrap {
             width: 100%;
-            max-width: 1000px;
+            max-width: 500px;
             padding: 1rem;
             position: relative;
         }
 
-        .login-header {
+        .register-header {
             text-align: center;
             margin-bottom: 2rem;
             color: white;
@@ -55,14 +55,7 @@
             opacity: 0.9;
         }
 
-        .login-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .login-card {
+        .register-card {
             background: white;
             border-radius: 12px;
             padding: 2.2rem;
@@ -71,18 +64,12 @@
             transition: all 0.3s ease;
         }
 
-        .login-card:hover {
-            border-color: rgba(139,92,246,0.3);
-            transform: translateY(-4px);
-            box-shadow: 0 32px 80px rgba(0,0,0,0.4);
-        }
-
         .card-icon {
             font-size: 2.2rem;
             margin-bottom: 0.8rem;
         }
 
-        .login-title {
+        .register-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.7rem;
             color: #1a2548;
@@ -90,7 +77,7 @@
             font-weight: 700;
         }
 
-        .login-sub {
+        .register-sub {
             font-size: 0.9rem;
             color: #64748b;
             margin-bottom: 1.6rem;
@@ -131,7 +118,7 @@
             margin-top: 0.3rem;
         }
 
-        .btn-login {
+        .btn-register {
             width: 100%;
             padding: 1rem;
             background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%);
@@ -148,7 +135,7 @@
             box-shadow: 0 4px 12px rgba(139,92,246,0.2);
         }
 
-        .btn-login:hover {
+        .btn-register:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 24px rgba(139,92,246,0.4);
         }
@@ -166,29 +153,55 @@
             box-shadow: 0 2px 8px rgba(239,68,68,0.1);
         }
 
-        .login-footer {
+        .flash.success {
+            background: #dcfce7;
+            border: 1px solid #86efac;
+            border-left: 4px solid #22c55e;
+            color: #166534;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .login-link a {
+            color: #a78bfa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .login-link a:hover {
+            color: #c4b5fd;
+        }
+
+        .register-footer {
             text-align: center;
             color: rgba(255,255,255,0.8);
             font-size: 0.75rem;
+            margin-top: 2rem;
         }
 
         @media (max-width: 768px) {
-            .login-container {
-                grid-template-columns: 1fr;
-            }
             .brand-title {
                 font-size: 1.6rem;
+            }
+            .register-card {
+                padding: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
 
-<div class="login-wrap">
-    <div class="login-header">
-        
-        <div class="brand-title">Welcome Back</div>
-        <!-- <div class="brand-sub">Access your academic results with ease</div> -->
+<div class="register-wrap">
+    <div class="register-header">
+        <div class="brand-icon-lg">📚</div>
+        <div class="brand-title">Admin Registration</div>
+        <div class="brand-sub">Create your admin account</div>
     </div>
 
     <!-- Flash Messages -->
@@ -196,68 +209,50 @@
     {% if messages %}
         {% for cat, msg in messages %}
         <div style="margin-bottom: 1.5rem;">
-            <div class="flash">{{ msg }}</div>
+            <div class="flash{% if cat == 'success' %} success{% endif %}">{{ msg }}</div>
         </div>
         {% endfor %}
     {% endif %}
     {% endwith %}
 
-    <div class="login-container">
-        <!-- ADMIN LOGIN -->
-        <div class="login-card">
-            <!-- <div class="card-icon">🧑‍💼</div> -->
-            <div class="login-title">Admin Login</div>
+    <div class="register-card">
+        <div class="register-title">Create Admin Account</div>
+        <div class="register-sub">Fill in the details below to create your admin account</div>
 
-            <form method="POST" action="{{ url_for('login') }}">
-                <input type="hidden" name="login_type" value="admin">
+        <form method="POST" action="{{ url_for('admin_register') }}">
+            <div class="form-group">
+                <label for="admin_username">Username</label>
+                <input type="text" id="admin_username" name="admin_username"
+                       placeholder="Enter a unique username"
+                       autocomplete="username" required>
+                <div class="form-hint">Minimum 3 characters</div>
+            </div>
 
-                <div class="form-group">
-                    <label for="admin_username">Username</label>
-                    <input type="text" id="admin_username" name="admin_username"
-                           placeholder="Enter admin username"
-                           autocomplete="username" required>
-                    <!-- <div class="form-hint">Default: admin</div> -->
-                </div>
+            <div class="form-group">
+                <label for="admin_password">Password</label>
+                <input type="password" id="admin_password" name="admin_password"
+                       placeholder="Enter a strong password"
+                       autocomplete="new-password" required>
+                <div class="form-hint">Minimum 6 characters</div>
+            </div>
 
-                <div class="form-group">
-                    <label for="admin_password">Password</label>
-                    <input type="password" id="admin_password" name="admin_password"
-                           placeholder="Enter admin password"
-                           autocomplete="current-password" required>
-                    <!-- <div class="form-hint">Default: admin123</div> -->
-                </div>
+            <div class="form-group">
+                <label for="admin_confirm_password">Confirm Password</label>
+                <input type="password" id="admin_confirm_password" name="admin_confirm_password"
+                       placeholder="Confirm your password"
+                       autocomplete="new-password" required>
+            </div>
 
-                <button type="submit" class="btn-login">Login as Admin</button>
-            </form>
-            <p style="text-align: center; margin-top: 1rem; font-size: 0.9rem; color: #64748b;">
-                Don't have an account? <a href="{{ url_for('admin_register') }}" style="color: #8b5cf6; text-decoration: none; font-weight: 600;">Register here</a>
-            </p>
-        </div>
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
 
-        <!-- STUDENT LOGIN -->
-        <div class="login-card">
-            <!-- <div class="card-icon"></div> -->
-            <div class="login-title">Student Login</div>
-            <!-- <div class="login-sub">View your result and academic performance</div> -->
-
-            <form method="POST" action="{{ url_for('login') }}">
-                <input type="hidden" name="login_type" value="student">
-
-                <div class="form-group">
-                    <label for="student_roll">Roll Number</label>
-                    <input type="text" id="student_roll" name="student_roll"
-                           autocomplete="username" required placeholder="Enter your roll number">
-                </div>
-
-                <div style="height: 66px;"></div>
-
-                <button type="submit" class="btn-login">Login as Student</button>
-            </form>
+        <div class="login-link">
+            Already have an account? <a href="{{ url_for('login') }}">Login here</a>
         </div>
     </div>
 
-    <div class="login-footer">
-        Your academic journey starts here | Student Result Management System © 2026
+    <div class="register-footer">
+        Student Result Management System © 2026 | Secure Registration
     </div>
 </div>
 

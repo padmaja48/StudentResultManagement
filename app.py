@@ -3,6 +3,7 @@ import sqlite3
 import os
 from datetime import timedelta
 from functools import wraps
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_2024'  # Change this in production
@@ -49,10 +50,6 @@ def init_db():
             password TEXT NOT NULL
         )
     ''')
-    
-    # Insert default admin user
-    c.execute("INSERT INTO admin (username, password) VALUES (?, ?)", 
-              ('admin', 'admin123'))
     
     conn.commit()
     conn.close()
@@ -140,12 +137,12 @@ def login():
             
             conn = get_db_connection()
             admin = conn.execute(
-                'SELECT * FROM admin WHERE username = ? AND password = ?',
-                (username, password)
+                'SELECT * FROM admin WHERE username = ?',
+                (username,)
             ).fetchone()
             conn.close()
             
-            if admin:
+            if admin and check_password_hash(admin['password'], password):
                 session.permanent = True
                 session['user_id'] = admin['id']
                 session['username'] = admin['username']
@@ -184,6 +181,58 @@ def login():
                 return redirect(url_for('login'))
     
     return render_template('login.html')
+
+@app.route('/admin/register', methods=['GET', 'POST'])
+def admin_register():
+    """Admin registration page"""
+    if request.method == 'POST':
+        username = request.form.get('admin_username')
+        password = request.form.get('admin_password')
+        confirm_password = request.form.get('admin_confirm_password')
+        
+        # Validation
+        errors = []
+        
+        if not username or not password or not confirm_password:
+            errors.append('All fields are required!')
+        
+        if username and len(username) < 3:
+            errors.append('Username must be at least 3 characters long!')
+        
+        if password and len(password) < 6:
+            errors.append('Password must be at least 6 characters long!')
+        
+        if password != confirm_password:
+            errors.append('Passwords do not match!')
+        
+        if not errors:
+            conn = get_db_connection()
+            # Check if username already exists
+            existing = conn.execute(
+                'SELECT * FROM admin WHERE username = ?',
+                (username,)
+            ).fetchone()
+            
+            if existing:
+                errors.append('Username already exists! Please choose a different one.')
+            else:
+                # Hash password and insert new admin
+                hashed_password = generate_password_hash(password)
+                conn.execute(
+                    'INSERT INTO admin (username, password) VALUES (?, ?)',
+                    (username, hashed_password)
+                )
+                conn.commit()
+                conn.close()
+                flash('Registration successful! Please login with your credentials.', 'success')
+                return redirect(url_for('login'))
+            conn.close()
+        
+        for error in errors:
+            flash(error, 'danger')
+        return redirect(url_for('admin_register'))
+    
+    return render_template('admin_register.html')
 
 # ===================== ADMIN ROUTES =====================
 
