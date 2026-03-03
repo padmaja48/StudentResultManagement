@@ -116,8 +116,8 @@ def calculate_grade(marks):
 
 @app.route('/')
 def home():
-    """Home page"""
-    return render_template('base.html')
+    """Home page - redirect to login"""
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
